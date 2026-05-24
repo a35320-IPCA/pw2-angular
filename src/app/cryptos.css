@@ -1,0 +1,8 @@
+.container { padding: 12px; }
+.loading { color: #666; margin-bottom: 8px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 6px 8px; border-bottom: 1px solid #e5e5e5; text-align: left; }
+.bold { font-weight: 700; }
+.positivo { color: green; }
+.negativo { color: red; }
+.neutro { color: #333; }

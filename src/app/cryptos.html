@@ -1,0 +1,38 @@
+<div class="container">
+  <h2>💱 Criptomoedas</h2>
+
+  <div *ngIf="carregando" class="loading">A carregar dados de criptomoedas...</div>
+
+  <div *ngIf="!carregando">
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Nome</th>
+            <th>Data Compra</th>
+            <th>QT</th>
+            <th>Preço Compra</th>
+            <th>Preço Atual</th>
+            <th>Valor Atual</th>
+            <th>Variação %</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of listaCryptos">
+            <td class="bold">{{ c.symbol }}</td>
+            <td>{{ c.nome }}</td>
+            <td>{{ c.dataCompra }}</td>
+            <td>{{ c.quantidade }}</td>
+            <td>{{ c.precoCompra | currency:'USD':'symbol':'1.2-2' }}</td>
+            <td>{{ c.precoAtual | currency:'USD':'symbol':'1.2-2' }}</td>
+            <td class="bold">{{ c.valorAtual | currency:'USD':'symbol':'1.2-2' }}</td>
+            <td [ngClass]="c.variacaoPercentual > 0 ? 'positivo' : (c.variacaoPercentual < 0 ? 'negativo' : 'neutro')" class="bold">
+              {{ c.variacaoPercentual > 0 ? '+' : '' }}{{ c.variacaoPercentual | number:'1.2-2' }}%
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

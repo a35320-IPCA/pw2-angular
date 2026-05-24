@@ -1,0 +1,152 @@
+<div class="container">
+  <div class="hero-card">
+    <div>
+      <p class="eyebrow">Carteira em tempo real</p>
+      <h1>📊 {{ titlo }}</h1>
+      <p class="subtitle">
+        Cotações atualizadas pela API do Finnhub, com refresh automático e botão manual.
+      </p>
+    </div>
+
+    <button class="refresh-button" type="button" (click)="atualizarAgora()" [disabled]="carregando">
+      {{ carregando ? 'A atualizar...' : 'Atualizar agora' }}
+    </button>
+  </div>
+
+  <div class="status-strip">
+    <div class="status-chip">
+      <span class="status-label">Última busca</span>
+      <strong>{{ ultimaBuscaApi ? (ultimaBuscaApi | date:'dd/MM/yyyy HH:mm:ss') : 'Sem dados' }}</strong>
+    </div>
+    <div class="status-chip">
+      <span class="status-label">Ações monitorizadas</span>
+      <strong>{{ listaAcoes.length }}</strong>
+    </div>
+    <div class="status-chip">
+      <span class="status-label">Ações não compradas</span>
+      <strong>{{ listaAcoesObservacao.length }}</strong>
+    </div>
+    <div class="status-chip">
+      <span class="status-label">Valor atual global</span>
+      <strong>{{ valorAtualGlobal | number:'1.2-2' }}</strong>
+    </div>
+  </div>
+
+  <div *ngIf="carregando" class="loading">
+    A obter cotações em tempo real da API do Finnhub...
+  </div>
+
+  <div *ngIf="!carregando">
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Ticker</th>
+            <th>Empresa</th>
+            <th>Data Compra</th>
+            <th>QT</th>
+            <th>PU</th>
+            <th>Total</th>
+            <th>Cotação Atual</th>
+            <th>Valor Atual</th>
+            <th>Variação %</th>
+            <th>Gráfico</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let acao of listaAcoes">
+            <td class="bold">{{ acao.ticker }}</td>
+            <td>{{ acao.empresa }}</td>
+            <td>{{ acao.dataCompra | date:'dd/MM/yyyy' }}</td>
+            <td>{{ acao.quantidade }}</td>
+            <td>{{ acao.precoCompra | number:'1.2-2' }}</td>
+            <td>{{ acao.totalCompra | number:'1.2-2' }}</td>
+            <td>{{ acao.cotacaoAtual | number:'1.2-2' }}</td>
+            <td class="bold">{{ acao.valorAtual | number:'1.2-2' }}</td>
+            <td class="bold" [class.positivo]="acao.variacaoPercentual > 0" [class.negativo]="acao.variacaoPercentual < 0" [class.neutro]="acao.variacaoPercentual === 0">
+              {{ acao.variacaoPercentual > 0 ? '+' : '' }}{{ acao.variacaoPercentual | number:'1.2-2' }}%
+            </td>
+            <td>
+              <button class="chart-button" type="button" (click)="mostrarGraficoAcaoComprada(acao)">Ver gráfico</button>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="6" class="bold">TOTAL</td>
+            <td class="bold">{{ totalInvestidoGlobal | number:'1.2-2' }}</td>
+            <td></td>
+            <td class="bold">{{ valorAtualGlobal | number:'1.2-2' }}</td>
+            <td class="bold" [class.positivo]="variacaoGlobal > 0" [class.negativo]="variacaoGlobal < 0" [class.neutro]="variacaoGlobal === 0">
+              {{ variacaoGlobal > 0 ? '+' : '' }}{{ variacaoGlobal | number:'1.2-2' }}%
+            </td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="table-responsive" *ngIf="listaAcoesObservacao.length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>Ticker</th>
+            <th>Empresa</th>
+            <th>Status</th>
+            <th>Cotação Atual</th>
+            <th>Gráfico</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let acao of listaAcoesObservacao">
+            <td class="bold">{{ acao.ticker }}</td>
+            <td>{{ acao.empresa }}</td>
+            <td>Não comprada</td>
+            <td class="bold">{{ acao.cotacaoAtual | number:'1.2-2' }}</td>
+            <td>
+              <button class="chart-button" type="button" (click)="mostrarGraficoAcaoNaoComprada(acao)">Ver gráfico</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <section class="chart-panel" *ngIf="chartCarregando || chartPoints.length > 0">
+      <div class="chart-header">
+        <h2>{{ selectedTicker }} · {{ selectedEmpresa }}</h2>
+        <p>
+          Última cotação: <strong>{{ selectedPrice | number:'1.2-2' }}</strong> ·
+          Mín: <strong>{{ chartMinPrice | number:'1.2-2' }}</strong> ·
+          Máx: <strong>{{ chartMaxPrice | number:'1.2-2' }}</strong>
+        </p>
+      </div>
+
+      <p class="chart-loading" *ngIf="chartCarregando">A carregar histórico do gráfico via API...</p>
+
+      <svg *ngIf="chartPoints.length > 0" class="line-chart" viewBox="0 0 760 280" role="img" aria-label="Gráfico de linhas da ação selecionada">
+        <defs>
+          <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#41e18b" stop-opacity="0.35" />
+            <stop offset="100%" stop-color="#41e18b" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+
+        <polyline class="chart-grid" points="44,30 44,250 716,250" />
+        <path [attr.d]="chartPath + ' L 716 250 L 44 250 Z'" fill="url(#lineGradient)"></path>
+        <path class="line-path" [attr.d]="chartPath"></path>
+
+        <g *ngFor="let point of chartPoints">
+          <circle class="chart-dot" [attr.cx]="point.x" [attr.cy]="point.y" r="4"></circle>
+        </g>
+
+        <g *ngFor="let point of chartPoints; let i = index">
+          <text class="chart-value" [attr.x]="point.x" [attr.y]="point.y < 40 ? (point.y + 14) : (point.y - 8)">{{ point.value | number:'1.2-2' }}</text>
+        </g>
+
+        <g *ngFor="let point of chartPoints; let i = index">
+          <text *ngIf="i % 2 === 0 || i === chartPoints.length - 1" class="chart-label" [attr.x]="point.x" y="268">{{ point.label }}</text>
+        </g>
+      </svg>
+    </section>
+  </div>
+</div>

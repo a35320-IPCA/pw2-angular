@@ -1,0 +1,15 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap");
+
+/* Global dark blue + green base theme */
+html,
+body {
+	margin: 0;
+	padding: 0;
+	background-color: #050b16;
+	color: #e7f2ff;
+	font-family: "Space Grotesk", "IBM Plex Sans", "Segoe UI", sans-serif;
+}
+
+* {
+	box-sizing: border-box;
+}

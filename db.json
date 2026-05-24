@@ -1,0 +1,23 @@
+[
+  {
+    "ticker": "MSFT",
+    "empresa": "Microsoft Corporation",
+    "dataCompra": "2023-11-15",
+    "quantidade": 10,
+    "precoCompra": 360.50
+  },
+  {
+    "ticker": "TSLA",
+    "empresa": "Tesla, Inc.",
+    "dataCompra": "2024-01-10",
+    "quantidade": 15,
+    "precoCompra": 215.20
+  },
+  {
+    "ticker": "AAPL",
+    "empresa": "Apple Inc.",
+    "dataCompra": "2023-05-22",
+    "quantidade": 8,
+    "precoCompra": 175.00
+  }
+]
